@@ -1,0 +1,48 @@
+appId: com.edwardlee.magi
+productName: Magi
+asar: true
+npmRebuild: false
+
+directories:
+  output: release
+
+files:
+  - out/**/*
+  - resources/**/*
+  - package.json
+
+extraResources:
+  - from: .packaging/windows-runtime/magi
+    to: magi
+    filter:
+      - "**/*"
+  # electron-builder excludes nested node_modules from broad resource globs.
+  # Stage the Windows production dependency tree explicitly so the bundled
+  # headless service can load better-sqlite3 and the other core dependencies.
+  - from: .packaging/windows-runtime/magi/node_modules
+    to: magi/node_modules
+    filter:
+      - "**/*"
+  - from: .packaging/windows-runtime/node
+    to: node
+    filter:
+      - "**/*"
+
+win:
+  icon: resources/icon.png
+  target:
+    - target: nsis
+      arch:
+        - x64
+  artifactName: "${productName}-${version}-Setup-${arch}.${ext}"
+
+nsis:
+  oneClick: false
+  perMachine: false
+  allowToChangeInstallationDirectory: true
+  createDesktopShortcut: true
+  createStartMenuShortcut: true
+  shortcutName: Magi
+  uninstallDisplayName: Magi
+
+publish: null

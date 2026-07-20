@@ -1,0 +1,99 @@
+name: CI
+
+on:
+  push:
+    branches: [main, dev]
+  pull_request:
+    branches: [main]
+
+jobs:
+  test:
+    name: Test on ${{ matrix.os }} with Node ${{ matrix.node }}
+    runs-on: ${{ matrix.os }}
+    continue-on-error: ${{ matrix.experimental }}
+
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: ubuntu-latest
+            node: 22
+            experimental: false
+          - os: macos-latest
+            node: 22
+            experimental: false
+          - os: ubuntu-latest
+            node: 24
+            experimental: true
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node }}
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Type check
+        run: npx tsc --noEmit
+
+      - name: Run tests
+        run: npm test
+
+      - name: Build
+        run: npm run build
+
+      - name: Run black-box CLI matrix
+        run: npm run test:blackbox
+
+      - name: Run complex task harness
+        if: matrix.os == 'ubuntu-latest' && matrix.node == 22
+        run: npm run test:complex-harness
+
+      - name: Run model task benchmark
+        run: npm run test:model-tasks
+
+      - name: Install Playwright Chromium
+        if: matrix.os == 'ubuntu-latest' && matrix.node == 22
+        run: npx playwright install --with-deps chromium
+
+      - name: Run capability eval gates
+        if: matrix.os == 'ubuntu-latest' && matrix.node == 22
+        run: |
+          npm run test:memory-eval
+          npm run test:patch-eval
+          npm run test:goal-plan-eval
+          npm run test:tool-discovery-eval
+          npm run test:control-api-eval
+          npm run report:capability
+
+      - name: Smoke test (Unix)
+        if: runner.os != 'Windows'
+        run: bash scripts/smoke.sh
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+
+  lint:
+    name: Lint
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run lint
+        run: npm run lint

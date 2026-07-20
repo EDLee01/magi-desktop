@@ -1,0 +1,14 @@
+node_modules/
+dist/
+desktop/out/
+desktop/.packaging/
+desktop/release/
+desktop-preview.png
+coverage/
+runner/target/
+.magi-reports/
+*.log
+.DS_Store
+.claude/
+feishu-bridge/config.local.toml
+feishu-bridge/.venv/

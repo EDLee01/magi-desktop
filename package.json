@@ -1,0 +1,67 @@
+{
+  "name": "@edwardlee5423/magi",
+  "version": "0.1.14",
+  "description": "Magi Next clean-room CLI bootstrap.",
+  "type": "module",
+  "license": "MIT",
+  "bin": {
+    "magi": "dist/cli.js"
+  },
+  "files": [
+    "dist",
+    "capability-manifest.json",
+    "README.md",
+    "LICENSE"
+  ],
+  "scripts": {
+    "preflight": "node scripts/preflight.mjs",
+    "build": "tsc -p tsconfig.build.json",
+    "build:runner": "cargo build --manifest-path runner/Cargo.toml",
+    "type": "tsc --noEmit",
+    "format": "prettier --write \"src/**/*.ts\" \"tests/**/*.ts\"",
+    "format:check": "prettier --check \"src/**/*.ts\" \"tests/**/*.ts\"",
+    "lint": "npm run format:check && node scripts/lint-clean-room.mjs && tsc --noEmit",
+    "test": "vitest run",
+    "test:memory-eval": "npm run build && node scripts/memory-recall-eval.mjs",
+    "test:patch-eval": "npm run build && node scripts/patch-engine-eval.mjs",
+    "test:goal-plan-eval": "npm run build && node scripts/goal-plan-eval.mjs",
+    "test:tool-discovery-eval": "npm run build && node scripts/tool-discovery-eval.mjs",
+    "test:control-api-eval": "npm run build && node scripts/control-api-eval.mjs",
+    "test:blackbox": "npm run build && node scripts/blackbox-e2e.mjs",
+    "test:tui-boundary": "npm run build && node scripts/tui-boundary-stress.mjs",
+    "test:complex-harness": "npm run build && node scripts/complex-task-harness.mjs",
+    "test:model-tasks": "npm run build && node scripts/model-task-benchmark.mjs",
+    "test:live-smoke": "npm run build && node scripts/live-model-smoke.mjs",
+    "test:ssh-localhost": "npm run build && node scripts/ssh-localhost-smoke.mjs",
+    "test:upgrade-rollback": "node scripts/upgrade-rollback-smoke.mjs",
+    "desktop:dev": "npm run build && npm --prefix desktop run dev",
+    "desktop:build": "npm run build && npm --prefix desktop run build",
+    "desktop:type": "npm --prefix desktop run typecheck",
+    "desktop:test": "npm --prefix desktop run test",
+    "scan:secrets": "node scripts/scan-secrets.mjs",
+    "scan:licenses": "node scripts/scan-licenses.mjs",
+    "sbom": "node scripts/generate-sbom.mjs",
+    "report:capability": "npm run build && node scripts/capability-report.mjs",
+    "report:capability:nightly": "npm run build && node scripts/capability-report.mjs --profile nightly",
+    "verify": "npm run preflight && npm run lint && npm run test && npm run test:memory-eval && npm run test:patch-eval && npm run test:goal-plan-eval && npm run test:tool-discovery-eval && npm run test:control-api-eval && npm run test:blackbox && npm run test:complex-harness && npm run test:model-tasks && npm run build:runner && npm run scan:secrets && npm run scan:licenses && npm run sbom && npm run report:capability"
+  },
+  "dependencies": {
+    "better-sqlite3": "^12.10.0",
+    "qrcode-terminal": "^0.12.0",
+    "typescript": "^5.8.2",
+    "ws": "^8.20.1",
+    "yaml": "^2.7.0"
+  },
+  "devDependencies": {
+    "@types/better-sqlite3": "^7.6.13",
+    "@types/node": "^22.13.10",
+    "@types/ws": "^8.18.1",
+    "playwright": "^1.60.0",
+    "prettier": "^3.8.3",
+    "tsx": "^4.19.3",
+    "vitest": "3.2.6"
+  },
+  "engines": {
+    "node": ">=22.0.0"
+  }
+}
