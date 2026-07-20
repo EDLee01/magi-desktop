@@ -93,7 +93,7 @@ jobs:
           shasum -a 256 release/Magi-*-mac-${{ matrix.arch }}.dmg
 
       - name: Upload build artifact
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: Magi-macOS-${{ matrix.arch }}
           path: desktop/release/Magi-*-mac-${{ matrix.arch }}.dmg
@@ -107,7 +107,7 @@ jobs:
 
     steps:
       - name: Download both installers
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v8
         with:
           pattern: Magi-macOS-*
           path: dist

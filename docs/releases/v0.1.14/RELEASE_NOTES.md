@@ -24,3 +24,17 @@ SHA-256:
 ```text
 a302247d33575a736243131a4d8d605732bb06b3c1091d6ff3a747b5baf424bf  Magi-0.1.14-Setup-x64.exe
 ```
+
+## macOS installers
+
+- Apple Silicon: native `arm64` DMG
+- Intel: native `x64` DMG
+- Runtime: architecture-matched Node.js 24.18.0 and Magi headless service
+- Signing: unsigned test builds; macOS Gatekeeper may require users to allow the app in Privacy & Security
+
+SHA-256:
+
+```text
+02bb9199d2ceb9ce4b015c785798f73737d81568b118c82b718f7862bf935fc8  Magi-0.1.14-mac-arm64.dmg
+17149990c1d2c9fc4c700459b184b2d1bb1014302c39a6342476c2f10771a9b4  Magi-0.1.14-mac-x64.dmg
+```
