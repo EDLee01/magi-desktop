@@ -137,8 +137,8 @@ async function verifyNativeBinaries() {
     "better_sqlite3.node"
   );
   await access(addonPath);
-  await run("lipo", ["-verify_arch", expectedArch, path.join(nodeRuntime, "bin", "node")]);
-  await run("lipo", ["-verify_arch", expectedArch, addonPath]);
+  await run("lipo", [path.join(nodeRuntime, "bin", "node"), "-verify_arch", expectedArch]);
+  await run("lipo", [addonPath, "-verify_arch", expectedArch]);
 }
 
 function run(command, args, options = {}) {

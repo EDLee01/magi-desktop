@@ -33,10 +33,10 @@ jobs:
 
     steps:
       - name: Check out source
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
       - name: Set up Node.js 24
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v5
         with:
           node-version: 24
           cache: npm
@@ -87,9 +87,9 @@ jobs:
           test -n "$APP_BINARY"
           test -n "$NODE_BINARY"
           test -n "$SQLITE_ADDON"
-          lipo -verify_arch "$EXPECTED_ARCH" "$APP_BINARY"
-          lipo -verify_arch "$EXPECTED_ARCH" "$NODE_BINARY"
-          lipo -verify_arch "$EXPECTED_ARCH" "$SQLITE_ADDON"
+          lipo "$APP_BINARY" -verify_arch "$EXPECTED_ARCH"
+          lipo "$NODE_BINARY" -verify_arch "$EXPECTED_ARCH"
+          lipo "$SQLITE_ADDON" -verify_arch "$EXPECTED_ARCH"
           shasum -a 256 release/Magi-*-mac-${{ matrix.arch }}.dmg
 
       - name: Upload build artifact
