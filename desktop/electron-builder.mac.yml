@@ -1,0 +1,40 @@
+appId: com.edwardlee.magi
+productName: Magi
+asar: true
+npmRebuild: false
+
+directories:
+  output: release
+
+files:
+  - out/**/*
+  - resources/**/*
+  - package.json
+
+extraResources:
+  - from: .packaging/macos-runtime/magi
+    to: magi
+    filter:
+      - "**/*"
+  # Stage the production dependency tree explicitly because electron-builder
+  # excludes nested node_modules from broad resource globs.
+  - from: .packaging/macos-runtime/magi/node_modules
+    to: magi/node_modules
+    filter:
+      - "**/*"
+  - from: .packaging/macos-runtime/node
+    to: node
+    filter:
+      - "**/*"
+
+mac:
+  icon: resources/icon.png
+  category: public.app-category.developer-tools
+  target:
+    - dmg
+  artifactName: "${productName}-${version}-mac-${arch}.${ext}"
+
+dmg:
+  title: "${productName} ${version}"
+
+publish: null

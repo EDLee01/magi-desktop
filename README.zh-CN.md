@@ -4,7 +4,7 @@ Magi 的独立 Electron 桌面端：包含项目与任务历史、OpenAI/Anthrop
 
 ## 下载
 
-请从 [GitHub Releases](https://github.com/EDLee01/magi-desktop/releases) 下载最新 Windows 安装包。安装包已经内置 Node.js 运行时和 Magi 无头服务，测试用户不需要额外安装依赖。
+请从 [GitHub Releases](https://github.com/EDLee01/magi-desktop/releases) 下载最新 Windows 或 macOS 安装包。macOS 分别提供 Apple Silicon（`arm64`）和 Intel（`x64`）版本。安装包已经内置 Node.js 运行时和 Magi 无头服务，测试用户不需要额外安装依赖。
 
 ## 本地开发
 
@@ -24,6 +24,8 @@ npm --prefix desktop run build
 ```
 
 桌面端会自动管理本地无头 Agent 服务，因此本仓库同时包含 Magi clean-room 运行时源码。
+
+维护者可以在 GitHub Actions 页面手动运行 **Build macOS Release** 工作流并填写 Release 标签。GitHub 会在两种原生 macOS runner 上分别构建、验证程序架构，并将两个 DMG 和校验文件上传到对应 Release。
 
 ---
 

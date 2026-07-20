@@ -1,0 +1,128 @@
+name: Build macOS Release
+
+on:
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: Existing or new release tag (for example v0.1.14)
+        required: true
+        default: v0.1.14
+        type: string
+
+permissions:
+  contents: write
+
+concurrency:
+  group: macos-release-${{ inputs.tag }}
+  cancel-in-progress: false
+
+jobs:
+  build:
+    name: Build macOS ${{ matrix.arch }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - runner: macos-15
+            arch: arm64
+            macho_arch: arm64
+          - runner: macos-15-intel
+            arch: x64
+            macho_arch: x86_64
+    runs-on: ${{ matrix.runner }}
+
+    steps:
+      - name: Check out source
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js 24
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+          cache-dependency-path: |
+            package-lock.json
+            desktop/package-lock.json
+
+      - name: Verify release version and runner architecture
+        env:
+          RELEASE_TAG: ${{ inputs.tag }}
+          TARGET_ARCH: ${{ matrix.arch }}
+        run: |
+          VERSION="$(node -p "require('./desktop/package.json').version")"
+          test "$RELEASE_TAG" = "v$VERSION"
+          test "$(node -p 'process.arch')" = "$TARGET_ARCH"
+
+      - name: Install and build Magi runtime
+        run: |
+          npm ci --no-audit --no-fund
+          npm run build
+
+      - name: Install, test, and build desktop app
+        working-directory: desktop
+        run: |
+          npm ci --no-audit --no-fund
+          npm run typecheck
+          npm test
+          npm run build
+
+      - name: Prepare native headless runtime
+        working-directory: desktop
+        run: node scripts/prepare-macos-runtime.mjs "${{ matrix.arch }}"
+
+      - name: Package unsigned DMG
+        working-directory: desktop
+        env:
+          CSC_IDENTITY_AUTO_DISCOVERY: "false"
+        run: npx electron-builder --config electron-builder.mac.yml --mac dmg --${{ matrix.arch }}
+
+      - name: Verify packaged architectures
+        working-directory: desktop
+        env:
+          EXPECTED_ARCH: ${{ matrix.macho_arch }}
+        run: |
+          APP_BINARY="$(find release -path '*/Magi.app/Contents/MacOS/Magi' -type f -print -quit)"
+          NODE_BINARY="$(find release -path '*/Magi.app/Contents/Resources/node/bin/node' -type f -print -quit)"
+          SQLITE_ADDON="$(find release -path '*/Magi.app/Contents/Resources/magi/node_modules/better-sqlite3/build/Release/better_sqlite3.node' -type f -print -quit)"
+          test -n "$APP_BINARY"
+          test -n "$NODE_BINARY"
+          test -n "$SQLITE_ADDON"
+          lipo -verify_arch "$EXPECTED_ARCH" "$APP_BINARY"
+          lipo -verify_arch "$EXPECTED_ARCH" "$NODE_BINARY"
+          lipo -verify_arch "$EXPECTED_ARCH" "$SQLITE_ADDON"
+          shasum -a 256 release/Magi-*-mac-${{ matrix.arch }}.dmg
+
+      - name: Upload build artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: Magi-macOS-${{ matrix.arch }}
+          path: desktop/release/Magi-*-mac-${{ matrix.arch }}.dmg
+          if-no-files-found: error
+          retention-days: 7
+
+  release:
+    name: Upload macOS installers to Release
+    needs: build
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Download both installers
+        uses: actions/download-artifact@v4
+        with:
+          pattern: Magi-macOS-*
+          path: dist
+          merge-multiple: true
+
+      - name: Generate checksums
+        working-directory: dist
+        run: sha256sum *.dmg > SHA256SUMS-macOS.txt
+
+      - name: Create release if needed and upload installers
+        env:
+          GH_TOKEN: ${{ github.token }}
+          RELEASE_TAG: ${{ inputs.tag }}
+        run: |
+          if ! gh release view "$RELEASE_TAG" --repo "$GITHUB_REPOSITORY" >/dev/null 2>&1; then
+            gh release create "$RELEASE_TAG" --repo "$GITHUB_REPOSITORY" --target "$GITHUB_SHA" --title "Magi Desktop $RELEASE_TAG" --generate-notes
+          fi
+          gh release upload "$RELEASE_TAG" dist/*.dmg dist/SHA256SUMS-macOS.txt --repo "$GITHUB_REPOSITORY" --clobber

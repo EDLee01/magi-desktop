@@ -4,7 +4,7 @@ The standalone Electron desktop experience for Magi: a local AI agent workbench 
 
 ## Download
 
-Download the latest Windows installer from [GitHub Releases](https://github.com/EDLee01/magi-desktop/releases). The installer includes its own Node.js runtime and Magi headless service, so testers do not need to install them separately.
+Download the latest Windows or macOS installer from [GitHub Releases](https://github.com/EDLee01/magi-desktop/releases). macOS builds are provided separately for Apple Silicon (`arm64`) and Intel (`x64`). Every installer includes its own Node.js runtime and Magi headless service, so testers do not need to install them separately.
 
 ## Development
 
@@ -24,6 +24,8 @@ npm --prefix desktop run build
 ```
 
 The clean-room Magi agent runtime is included in this repository because the packaged desktop app owns and starts its local headless service automatically.
+
+Maintainers can run the **Build macOS Release** workflow from the GitHub Actions page and provide a release tag. GitHub builds both architectures on native macOS runners, verifies the packaged binaries, and uploads both DMGs plus their checksums to that release.
 
 ---
 
