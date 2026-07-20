@@ -30,6 +30,6 @@ staging directory, and bundles both the runtime and Magi headless service into
 the installer. Testers do not need to install Node.js separately.
 
 Artifacts are written to `release/`, with the installer named like
-`Magi-0.1.13-Setup-x64.exe`. Internal test builds are unsigned, so Windows
+`Magi-0.1.14-Setup-x64.exe`. Internal test builds are unsigned, so Windows
 SmartScreen may show an unknown-publisher warning until a code-signing
 certificate is configured.
